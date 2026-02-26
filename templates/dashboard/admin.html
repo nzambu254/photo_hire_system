@@ -1,0 +1,157 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="bi bi-speedometer2"></i> Admin Dashboard</h2>
+
+<!-- Key Metrics -->
+<div class="row g-3 mb-4">
+    <div class="col-md-2">
+        <div class="card bg-success text-white shadow-sm text-center p-3">
+            <i class="bi bi-cash-stack fs-3"></i>
+            <h5 class="mt-1 mb-0">KES {{ total_revenue|intcomma }}</h5>
+            <small>Total Revenue</small>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card bg-primary text-white shadow-sm text-center p-3">
+            <i class="bi bi-calendar-month fs-3"></i>
+            <h5 class="mt-1 mb-0">KES {{ month_revenue|intcomma }}</h5>
+            <small>This Month</small>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card bg-info text-white shadow-sm text-center p-3">
+            <i class="bi bi-people fs-3"></i>
+            <h5 class="mt-1 mb-0">{{ total_customers }}</h5>
+            <small>Customers</small>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card bg-secondary text-white shadow-sm text-center p-3">
+            <i class="bi bi-box-seam fs-3"></i>
+            <h5 class="mt-1 mb-0">{{ total_equipment }}</h5>
+            <small>Equipment</small>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card bg-warning text-dark shadow-sm text-center p-3">
+            <i class="bi bi-calendar-check fs-3"></i>
+            <h5 class="mt-1 mb-0">{{ active_bookings }}</h5>
+            <small>Active Hires</small>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card bg-danger text-white shadow-sm text-center p-3">
+            <i class="bi bi-exclamation-triangle fs-3"></i>
+            <h5 class="mt-1 mb-0">{{ overdue_count }}</h5>
+            <small>Overdue</small>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row g-4 mb-4">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header"><h5 class="mb-0">Quick Actions</h5></div>
+            <div class="card-body">
+                <div class="d-flex flex-wrap gap-2">
+                    <a href="{% url 'equipment_create' %}" class="btn btn-outline-primary"><i class="bi bi-plus-lg"></i> Add Equipment</a>
+                    <a href="{% url 'create_staff' %}" class="btn btn-outline-primary"><i class="bi bi-person-plus"></i> Add Staff</a>
+                    <a href="{% url 'all_bookings' %}" class="btn btn-outline-primary"><i class="bi bi-list-check"></i> Bookings</a>
+                    <a href="{% url 'overdue_bookings' %}" class="btn btn-outline-danger"><i class="bi bi-exclamation-triangle"></i> Overdue</a>
+                    <a href="{% url 'finance_report' %}" class="btn btn-outline-success"><i class="bi bi-graph-up"></i> Finance</a>
+                    <a href="{% url 'manage_users' %}" class="btn btn-outline-secondary"><i class="bi bi-people"></i> Users</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header"><h5 class="mb-0">Equipment Inventory</h5></div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-4">
+                        <h3 class="text-success">{{ available_equipment }}</h3>
+                        <small class="text-muted">Available</small>
+                    </div>
+                    <div class="col-4">
+                        <h3 class="text-warning">{{ hired_equipment }}</h3>
+                        <small class="text-muted">Hired Out</small>
+                    </div>
+                    <div class="col-4">
+                        <h3 class="text-primary">{{ total_equipment }}</h3>
+                        <small class="text-muted">Total</small>
+                    </div>
+                </div>
+                {% for cat in categories %}
+                <div class="d-flex justify-content-between border-top pt-2 mt-2">
+                    <span><i class="bi {{ cat.icon }}"></i> {{ cat.name }}</span>
+                    <span>{{ cat.available_count }}/{{ cat.total_count }} available</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Bookings & Payments -->
+<div class="row g-4">
+    <div class="col-md-7">
+        <div class="card shadow-sm">
+            <div class="card-header d-flex justify-content-between">
+                <h5 class="mb-0">Recent Bookings</h5>
+                <a href="{% url 'all_bookings' %}" class="btn btn-sm btn-outline-primary">All</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover table-sm mb-0">
+                    <thead><tr><th>Booking</th><th>Customer</th><th>Equipment</th><th>Status</th></tr></thead>
+                    <tbody>
+                        {% for b in recent_bookings %}
+                        <tr>
+                            <td><a href="{% url 'booking_detail' b.pk %}">{{ b.booking_number }}</a></td>
+                            <td>{{ b.customer.get_full_name }}</td>
+                            <td>{{ b.equipment.name }}</td>
+                            <td>
+                                {% if b.status == 'confirmed' %}<span class="badge bg-success">Confirmed</span>
+                                {% elif b.status == 'issued' %}<span class="badge bg-primary">Issued</span>
+                                {% elif b.status == 'pending' %}<span class="badge bg-warning text-dark">Pending</span>
+                                {% elif b.status == 'returned' %}<span class="badge bg-secondary">Returned</span>
+                                {% else %}<span class="badge bg-dark">{{ b.get_status_display }}</span>{% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-5">
+        <div class="card shadow-sm">
+            <div class="card-header d-flex justify-content-between">
+                <h5 class="mb-0">Recent Payments</h5>
+                <a href="{% url 'payment_history' %}" class="btn btn-sm btn-outline-primary">All</a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover table-sm mb-0">
+                    <thead><tr><th>Booking</th><th>Amount</th><th>Method</th></tr></thead>
+                    <tbody>
+                        {% for p in recent_payments %}
+                        <tr>
+                            <td>{{ p.booking.booking_number }}</td>
+                            <td>KES {{ p.amount|intcomma }}</td>
+                            <td>
+                                {% if p.method == 'mpesa' %}<span class="badge bg-success">M-Pesa</span>
+                                {% else %}<span class="badge bg-primary">Card</span>{% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

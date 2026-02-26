@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}My Bookings{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="bi bi-calendar-check"></i> My Bookings</h2>
+
+<!-- Filters -->
+<div class="card mb-4">
+    <div class="card-body py-2">
+        <div class="d-flex gap-2 flex-wrap">
+            <a href="{% url 'my_bookings' %}" class="btn btn-sm {% if not status_filter %}btn-primary{% else %}btn-outline-secondary{% endif %}">All</a>
+            <a href="?status=pending" class="btn btn-sm {% if status_filter == 'pending' %}btn-warning{% else %}btn-outline-secondary{% endif %}">Pending</a>
+            <a href="?status=confirmed" class="btn btn-sm {% if status_filter == 'confirmed' %}btn-success{% else %}btn-outline-secondary{% endif %}">Confirmed</a>
+            <a href="?status=issued" class="btn btn-sm {% if status_filter == 'issued' %}btn-primary{% else %}btn-outline-secondary{% endif %}">Active</a>
+            <a href="?status=returned" class="btn btn-sm {% if status_filter == 'returned' %}btn-secondary{% else %}btn-outline-secondary{% endif %}">Returned</a>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th>Booking #</th>
+                    <th>Equipment</th>
+                    <th>Dates</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for b in bookings %}
+                <tr>
+                    <td><strong>{{ b.booking_number }}</strong></td>
+                    <td>{{ b.equipment.name }}</td>
+                    <td>{{ b.start_date|date:"M d" }} – {{ b.end_date|date:"M d, Y" }}</td>
+                    <td>KES {{ b.total_amount|intcomma }}</td>
+                    <td>
+                        {% if b.status == 'confirmed' %}<span class="badge bg-success">Confirmed</span>
+                        {% elif b.status == 'pending' %}<span class="badge bg-warning text-dark">Pending Payment</span>
+                        {% elif b.status == 'issued' %}<span class="badge bg-primary">Equipment Issued</span>
+                        {% elif b.status == 'returned' %}<span class="badge bg-secondary">Returned</span>
+                        {% elif b.status == 'overdue' %}<span class="badge bg-danger">Overdue</span>
+                        {% else %}<span class="badge bg-dark">{{ b.get_status_display }}</span>{% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'booking_detail' b.pk %}" class="btn btn-sm btn-outline-primary">View</a>
+                        {% if b.status == 'pending' %}
+                        <a href="{% url 'booking_payment' b.pk %}" class="btn btn-sm btn-success">Pay</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="6" class="text-center py-4 text-muted">
+                    <i class="bi bi-calendar-x display-4"></i>
+                    <p class="mt-2">No bookings yet. <a href="{% url 'equipment_list' %}">Browse equipment</a> to get started.</p>
+                </td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Home{% endblock %}
+{% block main_class %}{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="liz-hero">
+    <div class="container text-center">
+        <h1 class="hero-title">Liz Web</h1>
+        <p class="hero-subtitle">Photography Equipment Hire</p>
+        <p class="hero-desc">Professional cameras, lenses, lighting kits and tripods available for hire. Book online, pay with M-Pesa or card, and pick up your gear.</p>
+        <div class="mt-4">
+            <a href="{% url 'equipment_list' %}" class="btn btn-lg btn-light me-2"><i class="bi bi-grid"></i> Browse Equipment</a>
+            {% if not user.is_authenticated %}
+            <a href="{% url 'register' %}" class="btn btn-lg btn-outline-light"><i class="bi bi-person-plus"></i> Create Account</a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<!-- How It Works -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="section-title text-center mb-5">How It Works</h2>
+        <div class="row g-4">
+            <div class="col-md-3 text-center">
+                <div class="step-circle">1</div>
+                <h5 class="mt-3">Browse & Select</h5>
+                <p class="text-muted">Explore our catalog of professional photography equipment and choose what you need.</p>
+            </div>
+            <div class="col-md-3 text-center">
+                <div class="step-circle">2</div>
+                <h5 class="mt-3">Book & Pay</h5>
+                <p class="text-muted">Select your hire dates and pay securely via M-Pesa or card payment.</p>
+            </div>
+            <div class="col-md-3 text-center">
+                <div class="step-circle">3</div>
+                <h5 class="mt-3">Collect Gear</h5>
+                <p class="text-muted">Visit our location to collect your equipment. Our staff will have it ready for you.</p>
+            </div>
+            <div class="col-md-3 text-center">
+                <div class="step-circle">4</div>
+                <h5 class="mt-3">Return</h5>
+                <p class="text-muted">Return the equipment on or before the due date. Simple, hassle-free process.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="section-title text-center mb-5">Why Choose Liz Web?</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <i class="bi bi-shield-check feature-icon"></i>
+                    <h5>Quality Equipment</h5>
+                    <p>All our gear is professionally maintained and inspected before each hire.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <i class="bi bi-phone feature-icon"></i>
+                    <h5>M-Pesa Payments</h5>
+                    <p>Pay conveniently using M-Pesa or card. Instant confirmation on payment.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="feature-card">
+                    <i class="bi bi-clock-history feature-icon"></i>
+                    <h5>Real-Time Tracking</h5>
+                    <p>Track your bookings, view due dates, and manage your hire history all in one place.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

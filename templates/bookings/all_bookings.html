@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}All Bookings{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2><i class="bi bi-list-check"></i> All Bookings</h2>
+    <a href="{% url 'overdue_bookings' %}" class="btn btn-outline-danger"><i class="bi bi-exclamation-triangle"></i> Overdue Items</a>
+</div>
+
+<!-- Search & Filters -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-5">
+                <input type="text" name="search" value="{{ search }}" class="form-control" placeholder="Search booking #, customer, equipment...">
+            </div>
+            <div class="col-md-4">
+                <select name="status" class="form-control">
+                    <option value="">All Status</option>
+                    <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                    <option value="confirmed" {% if status_filter == 'confirmed' %}selected{% endif %}>Confirmed</option>
+                    <option value="issued" {% if status_filter == 'issued' %}selected{% endif %}>Issued</option>
+                    <option value="overdue" {% if status_filter == 'overdue' %}selected{% endif %}>Overdue</option>
+                    <option value="returned" {% if status_filter == 'returned' %}selected{% endif %}>Returned</option>
+                    <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <button type="submit" class="btn btn-primary w-100"><i class="bi bi-search"></i> Search</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th>Booking #</th>
+                    <th>Customer</th>
+                    <th>Equipment</th>
+                    <th>Dates</th>
+                    <th>Amount</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for b in bookings %}
+                <tr {% if b.is_overdue %}class="table-danger"{% endif %}>
+                    <td><strong>{{ b.booking_number }}</strong></td>
+                    <td>{{ b.customer.get_full_name }}<br><small class="text-muted">{{ b.customer.phone_number }}</small></td>
+                    <td>{{ b.equipment.name }}</td>
+                    <td>{{ b.start_date|date:"M d" }} – {{ b.end_date|date:"M d" }}</td>
+                    <td>KES {{ b.total_amount|intcomma }}</td>
+                    <td>
+                        {% if b.status == 'confirmed' %}<span class="badge bg-success">Confirmed</span>
+                        {% elif b.status == 'pending' %}<span class="badge bg-warning text-dark">Pending</span>
+                        {% elif b.status == 'issued' %}<span class="badge bg-primary">Issued</span>
+                        {% elif b.status == 'returned' %}<span class="badge bg-secondary">Returned</span>
+                        {% elif b.status == 'overdue' %}<span class="badge bg-danger">Overdue</span>
+                        {% else %}<span class="badge bg-dark">{{ b.get_status_display }}</span>{% endif %}
+                    </td>
+                    <td>
+                        <a href="{% url 'booking_detail' b.pk %}" class="btn btn-sm btn-outline-primary">View</a>
+                        {% if b.status == 'confirmed' %}
+                        <a href="{% url 'issue_equipment' b.pk %}" class="btn btn-sm btn-primary">Issue</a>
+                        {% elif b.status == 'issued' or b.status == 'overdue' %}
+                        <a href="{% url 'return_equipment' b.pk %}" class="btn btn-sm btn-warning">Return</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="7" class="text-center py-4 text-muted">No bookings found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

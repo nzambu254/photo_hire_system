@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% load role_tags %}
+{% block title %}{{ item.name }}{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'equipment_list' %}">Equipment</a></li>
+        <li class="breadcrumb-item"><a href="{% url 'equipment_list' %}?category={{ item.category.id }}">{{ item.category.name }}</a></li>
+        <li class="breadcrumb-item active">{{ item.name }}</li>
+    </ol>
+</nav>
+
+<div class="row g-4">
+    <div class="col-md-5">
+        {% if item.get_image_url %}
+        <img src="{{ item.get_image_url }}" class="img-fluid rounded shadow" alt="{{ item.name }}">
+        {% else %}
+        <div class="equipment-detail-placeholder rounded shadow">
+            <i class="bi bi-camera display-1 text-muted"></i>
+        </div>
+        {% endif %}
+    </div>
+    <div class="col-md-7">
+        <h2>{{ item.name }}</h2>
+        <p class="text-muted">{{ item.brand }} {{ item.model_number }}</p>
+
+        <div class="mb-3">
+            <span class="badge bg-secondary fs-6">{{ item.category.name }}</span>
+            {% if item.status == 'available' %}
+            <span class="badge bg-success fs-6">Available for Hire</span>
+            {% elif item.status == 'hired' %}
+            <span class="badge bg-warning text-dark fs-6">Currently Hired Out</span>
+            {% elif item.status == 'reserved' %}
+            <span class="badge bg-info fs-6">Reserved</span>
+            {% else %}
+            <span class="badge bg-secondary fs-6">{{ item.get_status_display }}</span>
+            {% endif %}
+        </div>
+
+        <div class="card bg-light mb-3">
+            <div class="card-body">
+                <h3 class="text-primary mb-0">KES {{ item.daily_rate|intcomma }} <small class="text-muted fs-6">/ day</small></h3>
+            </div>
+        </div>
+
+        <h5>Description</h5>
+        <p>{{ item.description }}</p>
+
+        <table class="table table-sm">
+            <tr><td class="text-muted">Serial Number</td><td><strong>{{ item.serial_number }}</strong></td></tr>
+            <tr><td class="text-muted">Brand</td><td>{{ item.brand|default:"-" }}</td></tr>
+            <tr><td class="text-muted">Model</td><td>{{ item.model_number|default:"-" }}</td></tr>
+            <tr><td class="text-muted">Replacement Value</td><td>KES {{ item.replacement_value|intcomma }}</td></tr>
+            {% if item.condition_notes %}
+            <tr><td class="text-muted">Condition</td><td>{{ item.condition_notes }}</td></tr>
+            {% endif %}
+        </table>
+
+        {% if user.is_authenticated and user|has_role:'customer' and item.is_available %}
+        <a href="{% url 'create_booking' item.pk %}" class="btn btn-primary btn-lg">
+            <i class="bi bi-calendar-plus"></i> Book Now
+        </a>
+        {% elif not user.is_authenticated %}
+        <a href="{% url 'login' %}" class="btn btn-primary btn-lg">
+            <i class="bi bi-box-arrow-in-right"></i> Login to Book
+        </a>
+        {% elif not item.is_available %}
+        <button class="btn btn-secondary btn-lg" disabled>
+            <i class="bi bi-x-circle"></i> Not Available
+        </button>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

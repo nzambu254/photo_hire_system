@@ -1,0 +1,352 @@
+/* ============================================
+   LIZ WEB - Photography Equipment Hire System
+   ============================================ */
+
+:root {
+    --liz-primary: #1a365d;
+    --liz-secondary: #2d6a4f;
+    --liz-accent: #e07a2f;
+    --liz-dark: #0f172a;
+    --liz-light: #f8fafc;
+    --liz-border: #e2e8f0;
+}
+
+/* ---- Typography ---- */
+body {
+    font-family: 'DM Sans', sans-serif;
+    background-color: #f1f5f9;
+    color: #1e293b;
+}
+
+h1, h2, h3, h4, h5, h6,
+.hero-title, .liz-brand, .section-title {
+    font-family: 'Playfair Display', serif;
+}
+
+/* ---- Navbar ---- */
+.liz-navbar {
+    background: linear-gradient(135deg, var(--liz-primary) 0%, #0f2847 100%);
+    padding: 0.8rem 0;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.15);
+}
+
+.liz-brand {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+}
+
+.liz-brand i {
+    color: var(--liz-accent);
+}
+
+.navbar-nav .nav-link {
+    font-weight: 500;
+    padding: 0.5rem 1rem !important;
+    transition: color 0.2s;
+}
+
+.navbar-nav .nav-link:hover {
+    color: var(--liz-accent) !important;
+}
+
+.dropdown-menu {
+    border: none;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+    border-radius: 10px;
+}
+
+/* ---- Hero ---- */
+.liz-hero {
+    background: linear-gradient(135deg, var(--liz-primary) 0%, #0a1628 50%, var(--liz-dark) 100%);
+    color: white;
+    padding: 5rem 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.liz-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(224,122,47,0.15) 0%, transparent 70%);
+    border-radius: 50%;
+}
+
+.hero-title {
+    font-size: 3.5rem;
+    font-weight: 700;
+    letter-spacing: -1px;
+    margin-bottom: 0.5rem;
+}
+
+.hero-subtitle {
+    font-size: 1.4rem;
+    color: var(--liz-accent);
+    font-weight: 500;
+    margin-bottom: 1rem;
+}
+
+.hero-desc {
+    font-size: 1.1rem;
+    color: #94a3b8;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* ---- Steps ---- */
+.step-circle {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--liz-primary);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin: 0 auto;
+    font-family: 'Playfair Display', serif;
+}
+
+/* ---- Feature Cards ---- */
+.feature-card {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+    transition: transform 0.2s, box-shadow 0.2s;
+    height: 100%;
+}
+
+.feature-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+}
+
+.feature-icon {
+    font-size: 2.5rem;
+    color: var(--liz-accent);
+    margin-bottom: 1rem;
+}
+
+/* ---- Cards ---- */
+.card {
+    border: 1px solid var(--liz-border);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.card-header {
+    background-color: #f8fafc;
+    border-bottom: 1px solid var(--liz-border);
+    padding: 1rem 1.25rem;
+}
+
+/* ---- Equipment Cards ---- */
+.equipment-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+}
+
+.equipment-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.equipment-img {
+    height: 200px;
+    object-fit: cover;
+}
+
+.equipment-img-placeholder {
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e2e8f0;
+}
+
+.equipment-detail-placeholder {
+    height: 350px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e2e8f0;
+}
+
+/* ---- Tables ---- */
+.table-dark {
+    background-color: var(--liz-primary) !important;
+}
+
+.table-dark th {
+    font-weight: 600;
+    border-color: rgba(255,255,255,0.1);
+}
+
+/* ---- Buttons ---- */
+.btn-primary {
+    background-color: var(--liz-primary);
+    border-color: var(--liz-primary);
+}
+
+.btn-primary:hover {
+    background-color: #122a4e;
+    border-color: #122a4e;
+}
+
+.btn-outline-primary {
+    color: var(--liz-primary);
+    border-color: var(--liz-primary);
+}
+
+.btn-outline-primary:hover {
+    background-color: var(--liz-primary);
+    border-color: var(--liz-primary);
+}
+
+.text-primary {
+    color: var(--liz-primary) !important;
+}
+
+.bg-primary {
+    background-color: var(--liz-primary) !important;
+}
+
+/* ---- Badges ---- */
+.badge {
+    font-weight: 500;
+    padding: 0.4em 0.7em;
+}
+
+/* ---- Alerts ---- */
+.alert {
+    border-radius: 10px;
+    border: none;
+}
+
+/* ---- Footer ---- */
+.liz-footer {
+    background-color: var(--liz-dark);
+    color: #cbd5e1;
+    padding: 3rem 0 1.5rem;
+}
+
+.liz-footer h5,
+.liz-footer h6 {
+    color: #ffffff;
+    margin-bottom: 0.8rem;
+}
+
+/* Override Bootstrap text-muted inside footer so text is visible on dark bg */
+.liz-footer .text-muted,
+.liz-footer p,
+.liz-footer li {
+    color: #94a3b8 !important;
+}
+
+.liz-footer a {
+    color: #cbd5e1;
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.liz-footer a:hover {
+    color: var(--liz-accent);
+}
+
+.liz-footer hr {
+    border-color: rgba(255, 255, 255, 0.15);
+    opacity: 1;
+}
+
+.liz-footer i {
+    color: var(--liz-accent);
+}
+
+/* ---- Section Title ---- */
+.section-title {
+    position: relative;
+    font-weight: 700;
+}
+
+.section-title::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 3px;
+    background: var(--liz-accent);
+    margin: 0.5rem auto 0;
+    border-radius: 3px;
+}
+
+/* ---- Form Styles ---- */
+.form-control:focus {
+    border-color: var(--liz-primary);
+    box-shadow: 0 0 0 0.2rem rgba(26, 54, 93, 0.15);
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 768px) {
+    .hero-title { font-size: 2.5rem; }
+    .hero-desc { font-size: 1rem; }
+    .liz-hero { padding: 3rem 0; }
+}
+
+/* ============================================
+   PASSWORD VISIBILITY TOGGLE (Eye Icon)
+   ============================================ */
+.password-wrapper {
+    position: relative;
+}
+
+.password-wrapper .form-control {
+    padding-right: 45px;
+}
+
+.password-toggle-btn {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #64748b;
+    cursor: pointer;
+    padding: 4px 6px;
+    font-size: 1.1rem;
+    z-index: 5;
+    transition: color 0.2s;
+    line-height: 1;
+}
+
+.password-toggle-btn:hover {
+    color: var(--liz-primary);
+}
+
+.password-toggle-btn:focus {
+    outline: none;
+}
+
+/* ============================================
+   M-PESA WAITING SPINNER
+   ============================================ */
+.mpesa-waiting-spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #e0e0e0;
+    border-top: 5px solid #43a047;
+    border-radius: 50%;
+    animation: mpesaSpin 1s linear infinite;
+    margin: 0 auto;
+}
+
+@keyframes mpesaSpin {
+    to { transform: rotate(360deg); }
+}

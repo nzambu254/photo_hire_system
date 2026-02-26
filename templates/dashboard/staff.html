@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Staff Dashboard{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="bi bi-speedometer2"></i> Staff Dashboard</h2>
+
+<!-- Quick Stats -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card bg-success text-white shadow">
+            <div class="card-body">
+                <h6><i class="bi bi-check-circle"></i> Ready to Issue</h6>
+                <h2>{{ pending_bookings }}</h2>
+                <a href="{% url 'all_bookings' %}?status=confirmed" class="text-white">View →</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-primary text-white shadow">
+            <div class="card-body">
+                <h6><i class="bi bi-box-seam"></i> Active Hires</h6>
+                <h2>{{ active_hires }}</h2>
+                <a href="{% url 'all_bookings' %}?status=issued" class="text-white">View →</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-danger text-white shadow">
+            <div class="card-body">
+                <h6><i class="bi bi-exclamation-triangle"></i> Overdue</h6>
+                <h2>{{ overdue_count }}</h2>
+                <a href="{% url 'overdue_bookings' %}" class="text-white">View →</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-dark shadow">
+            <div class="card-body">
+                <h6><i class="bi bi-calendar-event"></i> Due Today</h6>
+                <h2>{{ today_returns }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Overdue Alert -->
+{% if overdue_bookings %}
+<div class="alert alert-danger">
+    <h5><i class="bi bi-exclamation-triangle"></i> Overdue Items – Action Required</h5>
+    <div class="table-responsive">
+        <table class="table table-sm mb-0">
+            <thead><tr><th>Booking</th><th>Customer</th><th>Phone</th><th>Equipment</th><th>Days Over</th><th>Action</th></tr></thead>
+            <tbody>
+                {% for b in overdue_bookings %}
+                <tr>
+                    <td>{{ b.booking_number }}</td>
+                    <td>{{ b.customer.get_full_name }}</td>
+                    <td><a href="tel:{{ b.customer.phone_number }}">{{ b.customer.phone_number }}</a></td>
+                    <td>{{ b.equipment.name }}</td>
+                    <td><span class="badge bg-danger">{{ b.overdue_days }}d</span></td>
+                    <td><a href="{% url 'return_equipment' b.pk %}" class="btn btn-sm btn-warning">Return</a></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<!-- Recent Bookings -->
+<div class="card shadow-sm">
+    <div class="card-header d-flex justify-content-between">
+        <h5 class="mb-0">Recent Bookings</h5>
+        <a href="{% url 'all_bookings' %}" class="btn btn-sm btn-outline-primary">View All</a>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead><tr><th>Booking #</th><th>Customer</th><th>Equipment</th><th>Dates</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody>
+                {% for b in recent_bookings %}
+                <tr>
+                    <td><strong>{{ b.booking_number }}</strong></td>
+                    <td>{{ b.customer.get_full_name }}</td>
+                    <td>{{ b.equipment.name }}</td>
+                    <td>{{ b.start_date|date:"M d" }} – {{ b.end_date|date:"M d" }}</td>
+                    <td>
+                        {% if b.status == 'confirmed' %}<span class="badge bg-success">Ready</span>
+                        {% elif b.status == 'issued' %}<span class="badge bg-primary">Issued</span>
+                        {% else %}<span class="badge bg-danger">{{ b.get_status_display }}</span>{% endif %}
+                    </td>
+                    <td>
+                        {% if b.status == 'confirmed' %}
+                        <a href="{% url 'issue_equipment' b.pk %}" class="btn btn-sm btn-primary">Issue</a>
+                        {% elif b.status == 'issued' %}
+                        <a href="{% url 'return_equipment' b.pk %}" class="btn btn-sm btn-warning">Return</a>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

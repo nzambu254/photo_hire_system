@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Process Return{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-7">
+        <h2 class="mb-4"><i class="bi bi-box-arrow-in-down"></i> Process Equipment Return</h2>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-header"><h5 class="mb-0">{{ booking.booking_number }}</h5></div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Customer:</strong> {{ booking.customer.get_full_name }}</p>
+                        <p><strong>Equipment:</strong> {{ booking.equipment.name }}</p>
+                        <p><strong>Serial No:</strong> {{ booking.equipment.serial_number }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Hire Period:</strong> {{ booking.start_date }} – {{ booking.end_date }}</p>
+                        <p><strong>Hire Cost:</strong> KES {{ booking.total_amount|intcomma }}</p>
+                        {% if booking.is_overdue %}
+                        <div class="alert alert-danger py-2 mb-0">
+                            <i class="bi bi-exclamation-triangle"></i>
+                            <strong>OVERDUE by {{ booking.overdue_days }} days!</strong><br>
+                            Calculated Late Fee: <strong>KES {{ calculated_late_fee|intcomma }}</strong>
+                        </div>
+                        {% else %}
+                        <p class="text-success"><i class="bi bi-check-circle"></i> Returned on time</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-header"><h5 class="mb-0">Return Details</h5></div>
+            <div class="card-body">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Damage Charge (KES)</label>
+                        {{ form.damage_fee }}
+                        <small class="text-muted">Enter 0 if no damage. Equipment value: KES {{ booking.equipment.replacement_value|intcomma }}</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Damage Description</label>
+                        {{ form.damage_notes }}
+                    </div>
+                    <button type="submit" class="btn btn-warning btn-lg w-100">
+                        <i class="bi bi-check-lg"></i> Process Return
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

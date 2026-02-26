@@ -1,0 +1,113 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Book {{ item.name }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <nav aria-label="breadcrumb" class="mb-3">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'equipment_list' %}">Equipment</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'equipment_detail' item.pk %}">{{ item.name }}</a></li>
+                <li class="breadcrumb-item active">Book</li>
+            </ol>
+        </nav>
+
+        <h2 class="mb-4"><i class="bi bi-calendar-plus"></i> Book Equipment</h2>
+
+        <div class="row g-4">
+            <div class="col-md-5">
+                <div class="card">
+                    {% if item.get_image_url %}
+                    <img src="{{ item.get_image_url }}" class="card-img-top" alt="{{ item.name }}">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5>{{ item.name }}</h5>
+                        <p class="text-muted">{{ item.brand }} {{ item.model_number }}</p>
+                        <h4 class="text-primary">KES {{ item.daily_rate|intcomma }} <small class="text-muted">/ day</small></h4>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-7">
+                <div class="card shadow-sm">
+                    <div class="card-body p-4">
+                        <form method="post" id="bookingForm">
+                            {% csrf_token %}
+                            {{ form.equipment }}
+                            {% if form.errors %}
+                            <div class="alert alert-danger">
+                                <ul class="mb-0">
+                                {% for error in form.non_field_errors %}<li>{{ error }}</li>{% endfor %}
+                                {% for field in form %}{% for error in field.errors %}<li>{{ error }}</li>{% endfor %}{% endfor %}
+                                </ul>
+                            </div>
+                            {% endif %}
+                            <div class="mb-3">
+                                <label class="form-label">Start Date *</label>
+                                {{ form.start_date }}
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">End Date *</label>
+                                {{ form.end_date }}
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Special Requirements</label>
+                                {{ form.notes }}
+                            </div>
+
+                            <div class="card bg-light mb-3" id="costPreview" style="display:none;">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between">
+                                        <span>Daily Rate:</span>
+                                        <span>KES {{ item.daily_rate|intcomma }}</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <span>Days:</span>
+                                        <span id="numDays">-</span>
+                                    </div>
+                                    <hr>
+                                    <div class="d-flex justify-content-between fw-bold fs-5">
+                                        <span>Total:</span>
+                                        <span class="text-primary" id="totalCost">-</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-lg w-100">
+                                <i class="bi bi-calendar-check"></i> Confirm Booking
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const dailyRate = {{ item.daily_rate }};
+    const startInput = document.querySelector('[name="start_date"]');
+    const endInput = document.querySelector('[name="end_date"]');
+    const preview = document.getElementById('costPreview');
+
+    function calcCost() {
+        if (startInput.value && endInput.value) {
+            const start = new Date(startInput.value);
+            const end = new Date(endInput.value);
+            const days = Math.floor((end - start) / 86400000) + 1;
+            if (days > 0) {
+                document.getElementById('numDays').textContent = days + ' day' + (days > 1 ? 's' : '');
+                document.getElementById('totalCost').textContent = 'KES ' + (dailyRate * days).toLocaleString();
+                preview.style.display = 'block';
+            } else {
+                preview.style.display = 'none';
+            }
+        }
+    }
+    startInput.addEventListener('change', calcCost);
+    endInput.addEventListener('change', calcCost);
+    calcCost();
+</script>
+{% endblock %}

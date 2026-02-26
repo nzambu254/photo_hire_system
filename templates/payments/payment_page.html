@@ -1,0 +1,302 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Payment - {{ booking.booking_number }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <h2 class="mb-4"><i class="bi bi-credit-card"></i> Make Payment</h2>
+
+        <div class="row g-4">
+            <!-- Order Summary -->
+            <div class="col-md-5">
+                <div class="card shadow-sm">
+                    <div class="card-header"><h5 class="mb-0">Order Summary</h5></div>
+                    <div class="card-body">
+                        <p><strong>{{ booking.booking_number }}</strong></p>
+                        <p>{{ booking.equipment.name }}</p>
+                        <p class="text-muted">{{ booking.start_date }} – {{ booking.end_date }} ({{ booking.hire_days }} days)</p>
+                        <hr>
+                        <div class="d-flex justify-content-between fs-4">
+                            <span>Total:</span>
+                            <span class="fw-bold text-primary">KES {{ booking.total_amount|intcomma }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Methods -->
+            <div class="col-md-7">
+
+                <!-- ============ M-Pesa Section ============ -->
+                <div class="card shadow-sm mb-3" id="mpesa-section">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="bi bi-phone"></i> Pay with M-Pesa</h5>
+                    </div>
+                    <div class="card-body">
+
+                        <!-- Step 1: Enter phone number -->
+                        <div id="mpesa-form-step">
+                            <p class="text-muted">Enter your Safaricom M-Pesa number below. You will receive an STK Push on your phone — enter your M-Pesa PIN to complete payment.</p>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">M-Pesa Phone Number</label>
+                                <input type="tel" id="mpesa_phone" class="form-control form-control-lg"
+                                       value=""
+                                       placeholder="e.g. 0712345678"
+                                       maxlength="13"
+                                       autocomplete="tel">
+                                <small class="text-muted">Your Safaricom number e.g. 0712345678 or 254712345678</small>
+                            </div>
+                            <button type="button" class="btn btn-success w-100 btn-lg" id="mpesaPayBtn"
+                                    onclick="initiateStkPush()">
+                                <i class="bi bi-phone"></i> Send M-Pesa STK Push — KES {{ booking.total_amount|intcomma }}
+                            </button>
+                            <div id="mpesa-error" class="alert alert-danger mt-3" style="display:none;"></div>
+                        </div>
+
+                        <!-- Step 2: Waiting for PIN entry -->
+                        <div id="mpesa-waiting-step" style="display:none;">
+                            <div class="text-center py-4">
+                                <div class="mpesa-waiting-spinner mb-3"></div>
+                                <h5 class="text-success"><i class="bi bi-phone-vibrate"></i> STK Push Sent!</h5>
+                                <p class="fs-5">Check your phone <strong id="display-phone"></strong></p>
+                                <p class="text-muted">Enter your M-Pesa PIN on your phone to complete the payment</p>
+                                <div class="card bg-light mt-3">
+                                    <div class="card-body py-2">
+                                        <small class="text-muted" id="poll-status">Waiting for you to enter PIN...</small>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-outline-secondary mt-3" onclick="cancelWaiting()">
+                                    Cancel & Try Again
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Step 3: Success -->
+                        <div id="mpesa-success-step" style="display:none;">
+                            <div class="text-center py-4">
+                                <i class="bi bi-check-circle-fill text-success" style="font-size:3rem;"></i>
+                                <h4 class="text-success mt-3">Payment Successful!</h4>
+                                <p>M-Pesa receipt: <strong id="receipt-number"></strong></p>
+                                <p class="text-muted">Redirecting to your booking...</p>
+                            </div>
+                        </div>
+
+                        <!-- Step 4: Failed -->
+                        <div id="mpesa-failed-step" style="display:none;">
+                            <div class="text-center py-4">
+                                <i class="bi bi-x-circle-fill text-danger" style="font-size:3rem;"></i>
+                                <h4 class="text-danger mt-3">Payment Failed</h4>
+                                <p id="fail-message" class="text-muted"></p>
+                                <button type="button" class="btn btn-success" onclick="resetMpesa()">
+                                    <i class="bi bi-arrow-clockwise"></i> Try Again
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- ============ Card Payment Section ============ -->
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="bi bi-credit-card"></i> Pay with Card</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="post" action="{% url 'process_card' booking.pk %}">
+                            {% csrf_token %}
+                            <div class="mb-3">
+                                <label class="form-label">Card Number</label>
+                                {{ card_form.card_number }}
+                            </div>
+                            <div class="row">
+                                <div class="col-6 mb-3">
+                                    <label class="form-label">Expiry</label>
+                                    {{ card_form.expiry }}
+                                </div>
+                                <div class="col-6 mb-3">
+                                    <label class="form-label">CVV</label>
+                                    {{ card_form.cvv }}
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Name on Card</label>
+                                {{ card_form.card_name }}
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100 btn-lg">
+                                <i class="bi bi-credit-card"></i> Pay KES {{ booking.total_amount|intcomma }} by Card
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const CSRF_TOKEN = '{{ csrf_token }}';
+const INITIATE_URL = '{% url "initiate_mpesa" booking.pk %}';
+const STATUS_URL = '{% url "check_mpesa_status" booking.pk %}';
+const BOOKING_PK = '{{ booking.pk }}';
+
+let pollInterval = null;
+let pollCount = 0;
+const MAX_POLLS = 40;  // 40 x 3s = 2 minutes timeout
+
+
+function initiateStkPush() {
+    const phoneInput = document.getElementById('mpesa_phone');
+    let phone = phoneInput.value.trim();
+    const errorDiv = document.getElementById('mpesa-error');
+    const btn = document.getElementById('mpesaPayBtn');
+
+    errorDiv.style.display = 'none';
+
+    // Validate phone is entered
+    if (!phone || phone.length < 9) {
+        errorDiv.textContent = 'Please enter your Safaricom M-Pesa phone number.';
+        errorDiv.style.display = 'block';
+        phoneInput.focus();
+        return;
+    }
+
+    // Remove any spaces or dashes
+    phone = phone.replace(/[\s\-]/g, '');
+
+    // Normalize to 254 format
+    if (phone.startsWith('0')) {
+        phone = '254' + phone.substring(1);
+    } else if (phone.startsWith('+254')) {
+        phone = phone.substring(1);
+    } else if (phone.startsWith('+')) {
+        phone = phone.substring(1);
+    }
+
+    // Validate it looks like a Kenyan number
+    if (!phone.startsWith('254') || phone.length !== 12) {
+        errorDiv.textContent = 'Enter a valid Safaricom number. Example: 0712345678';
+        errorDiv.style.display = 'block';
+        phoneInput.focus();
+        return;
+    }
+
+    // Disable button and show loading
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Sending STK Push...';
+
+    // Call Django backend → which calls Daraja API
+    fetch(INITIATE_URL, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': CSRF_TOKEN,
+        },
+        body: JSON.stringify({ phone_number: phone }),
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            // STK Push sent! Show waiting screen
+            document.getElementById('mpesa-form-step').style.display = 'none';
+            document.getElementById('mpesa-waiting-step').style.display = 'block';
+
+            // Display formatted phone for the user
+            let displayNum = phone;
+            if (phone.startsWith('254')) {
+                displayNum = '0' + phone.substring(3);
+            }
+            document.getElementById('display-phone').textContent = displayNum;
+
+            // Start polling for payment status
+            pollCount = 0;
+            pollInterval = setInterval(() => {
+                checkPaymentStatus(data.checkout_request_id);
+            }, 3000);
+
+        } else {
+            // STK Push failed — show the error from Daraja
+            errorDiv.innerHTML = '<strong>Error:</strong> ' + data.message;
+            errorDiv.style.display = 'block';
+            btn.disabled = false;
+            btn.innerHTML = '<i class="bi bi-phone"></i> Send M-Pesa STK Push — KES {{ booking.total_amount|intcomma }}';
+        }
+    })
+    .catch(err => {
+        errorDiv.textContent = 'Network error. Check your internet connection and try again.';
+        errorDiv.style.display = 'block';
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-phone"></i> Send M-Pesa STK Push — KES {{ booking.total_amount|intcomma }}';
+    });
+}
+
+
+function checkPaymentStatus(checkoutRequestId) {
+    pollCount++;
+    const statusText = document.getElementById('poll-status');
+
+    if (pollCount > MAX_POLLS) {
+        clearInterval(pollInterval);
+        showFailed('Request timed out. You may not have entered your PIN in time. Please try again.');
+        return;
+    }
+
+    statusText.textContent = 'Waiting for PIN entry... (' + (pollCount * 3) + 's)';
+
+    fetch(STATUS_URL + '?checkout_request_id=' + encodeURIComponent(checkoutRequestId), {
+        headers: { 'X-CSRFToken': CSRF_TOKEN },
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success) {
+            // Payment completed!
+            clearInterval(pollInterval);
+            document.getElementById('mpesa-waiting-step').style.display = 'none';
+            document.getElementById('mpesa-success-step').style.display = 'block';
+            document.getElementById('receipt-number').textContent = data.receipt_number || 'Confirmed';
+
+            setTimeout(() => {
+                window.location.href = data.redirect_url || '/bookings/' + BOOKING_PK + '/';
+            }, 2000);
+
+        } else if (data.failed) {
+            clearInterval(pollInterval);
+            showFailed(data.message);
+        }
+        // else: still pending, continue polling
+    })
+    .catch(err => {
+        statusText.textContent = 'Checking payment status...';
+    });
+}
+
+
+function showFailed(message) {
+    document.getElementById('mpesa-waiting-step').style.display = 'none';
+    document.getElementById('mpesa-failed-step').style.display = 'block';
+    document.getElementById('fail-message').textContent = message;
+}
+
+
+function cancelWaiting() {
+    if (pollInterval) clearInterval(pollInterval);
+    resetMpesa();
+}
+
+
+function resetMpesa() {
+    if (pollInterval) clearInterval(pollInterval);
+    document.getElementById('mpesa-form-step').style.display = 'block';
+    document.getElementById('mpesa-waiting-step').style.display = 'none';
+    document.getElementById('mpesa-success-step').style.display = 'none';
+    document.getElementById('mpesa-failed-step').style.display = 'none';
+    document.getElementById('mpesa-error').style.display = 'none';
+
+    const btn = document.getElementById('mpesaPayBtn');
+    btn.disabled = false;
+    btn.innerHTML = '<i class="bi bi-phone"></i> Send M-Pesa STK Push — KES {{ booking.total_amount|intcomma }}';
+}
+</script>
+{% endblock %}

@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-box-seam"></i> {{ title }}</h2>
+            <a href="{% url 'equipment_manage' %}" class="btn btn-outline-secondary">Back</a>
+        </div>
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <form method="post" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {% if form.errors %}
+                    <div class="alert alert-danger">
+                        <ul class="mb-0">
+                        {% for field in form %}{% for error in field.errors %}<li>{{ field.label }}: {{ error }}</li>{% endfor %}{% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+                    <div class="row">
+                        <div class="col-md-8 mb-3">
+                            <label class="form-label">Equipment Name *</label>
+                            {{ form.name }}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Category *</label>
+                            {{ form.category }}
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description *</label>
+                        {{ form.description }}
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Brand</label>
+                            {{ form.brand }}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Model Number</label>
+                            {{ form.model_number }}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Serial Number *</label>
+                            {{ form.serial_number }}
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Daily Rate (KES) *</label>
+                            {{ form.daily_rate }}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Replacement Value (KES) *</label>
+                            {{ form.replacement_value }}
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Status</label>
+                            {{ form.status }}
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Equipment Image (upload)</label>
+                        {{ form.image }}
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Or Image URL (external link)</label>
+                        {{ form.image_url }}
+                        <small class="text-muted">Paste a direct image URL if not uploading a file</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Condition Notes</label>
+                        {{ form.condition_notes }}
+                    </div>
+                    <div class="mb-3 form-check">
+                        {{ form.is_active }}
+                        <label class="form-check-label">Active (visible in catalog)</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg"><i class="bi bi-check-lg"></i> Save Equipment</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

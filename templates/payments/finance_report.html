@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Finance Report{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="bi bi-graph-up"></i> Finance Report</h2>
+
+<!-- Summary Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card bg-success text-white shadow">
+            <div class="card-body">
+                <h6><i class="bi bi-cash-stack"></i> Total Revenue</h6>
+                <h3>KES {{ total_revenue|intcomma }}</h3>
+                <small>{{ total_transactions }} transactions</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-primary text-white shadow">
+            <div class="card-body">
+                <h6><i class="bi bi-calendar-month"></i> This Month</h6>
+                <h3>KES {{ month_revenue|intcomma }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-dark shadow">
+            <div class="card-body">
+                <h6><i class="bi bi-clock"></i> Late Fees Collected</h6>
+                <h3>KES {{ outstanding_late|intcomma }}</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-danger text-white shadow">
+            <div class="card-body">
+                <h6><i class="bi bi-tools"></i> Damage Charges</h6>
+                <h3>KES {{ outstanding_damage|intcomma }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Revenue by Method -->
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header"><h5 class="mb-0">Revenue by Payment Method</h5></div>
+            <div class="card-body">
+                <table class="table mb-0">
+                    <thead><tr><th>Method</th><th>Transactions</th><th>Total</th></tr></thead>
+                    <tbody>
+                        {% for item in by_method %}
+                        <tr>
+                            <td>
+                                {% if item.method == 'mpesa' %}<span class="badge bg-success">M-Pesa</span>
+                                {% elif item.method == 'card' %}<span class="badge bg-primary">Card</span>
+                                {% else %}<span class="badge bg-warning text-dark">Cash</span>{% endif %}
+                            </td>
+                            <td>{{ item.count }}</td>
+                            <td><strong>KES {{ item.total|intcomma }}</strong></td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="3" class="text-muted text-center">No data yet</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Revenue by Type -->
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-header"><h5 class="mb-0">Revenue by Payment Type</h5></div>
+            <div class="card-body">
+                <table class="table mb-0">
+                    <thead><tr><th>Type</th><th>Count</th><th>Total</th></tr></thead>
+                    <tbody>
+                        {% for item in by_type %}
+                        <tr>
+                            <td>{{ item.payment_type|title }}</td>
+                            <td>{{ item.count }}</td>
+                            <td><strong>KES {{ item.total|intcomma }}</strong></td>
+                        </tr>
+                        {% empty %}
+                        <tr><td colspan="3" class="text-muted text-center">No data yet</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Monthly Trend -->
+<div class="card shadow-sm mt-4">
+    <div class="card-header"><h5 class="mb-0">Monthly Revenue (Last 6 Months)</h5></div>
+    <div class="card-body">
+        <div class="row">
+            {% for m in monthly_data %}
+            <div class="col-md-2 text-center mb-3">
+                <div class="bg-light rounded p-3">
+                    <small class="text-muted">{{ m.month }}</small>
+                    <h5 class="text-primary mt-2">KES {{ m.total|intcomma }}</h5>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Recent Payments -->
+<div class="card shadow-sm mt-4">
+    <div class="card-header d-flex justify-content-between">
+        <h5 class="mb-0">Recent Transactions</h5>
+        <a href="{% url 'payment_history' %}" class="btn btn-sm btn-outline-primary">View All</a>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead><tr><th>Booking</th><th>Customer</th><th>Amount</th><th>Method</th><th>Date</th></tr></thead>
+            <tbody>
+                {% for p in recent_payments %}
+                <tr>
+                    <td><a href="{% url 'booking_detail' p.booking.pk %}">{{ p.booking.booking_number }}</a></td>
+                    <td>{{ p.user.get_full_name }}</td>
+                    <td><strong>KES {{ p.amount|intcomma }}</strong></td>
+                    <td>
+                        {% if p.method == 'mpesa' %}<span class="badge bg-success">M-Pesa</span>
+                        {% else %}<span class="badge bg-primary">Card</span>{% endif %}
+                    </td>
+                    <td>{{ p.created_at|date:"M d, Y H:i" }}</td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="5" class="text-center text-muted py-3">No payments yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

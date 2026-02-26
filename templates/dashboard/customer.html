@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="bi bi-speedometer2"></i> Welcome, {{ user.first_name|default:user.username }}!</h2>
+
+<!-- Stats -->
+<div class="row g-4 mb-4">
+    <div class="col-md-4">
+        <div class="card bg-primary text-white shadow">
+            <div class="card-body">
+                <h6><i class="bi bi-calendar-check"></i> Total Bookings</h6>
+                <h2>{{ total_bookings }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-success text-white shadow">
+            <div class="card-body">
+                <h6><i class="bi bi-cash"></i> Total Spent</h6>
+                <h2>KES {{ total_spent|intcomma }}</h2>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-info text-white shadow">
+            <div class="card-body">
+                <h6><i class="bi bi-box-seam"></i> Active Hires</h6>
+                <h2>{{ active_bookings.count }}</h2>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Pending Payments -->
+{% if pending_bookings %}
+<div class="alert alert-warning">
+    <i class="bi bi-exclamation-triangle"></i> You have <strong>{{ pending_bookings.count }}</strong> booking{{ pending_bookings.count|pluralize }} pending payment.
+</div>
+<div class="row g-3 mb-4">
+    {% for b in pending_bookings %}
+    <div class="col-md-6">
+        <div class="card border-warning">
+            <div class="card-body">
+                <h6>{{ b.booking_number }} – {{ b.equipment.name }}</h6>
+                <p class="text-muted mb-2">{{ b.start_date }} – {{ b.end_date }} | KES {{ b.total_amount|intcomma }}</p>
+                <a href="{% url 'booking_payment' b.pk %}" class="btn btn-warning btn-sm"><i class="bi bi-credit-card"></i> Pay Now</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Active Hires -->
+{% if active_bookings %}
+<h4 class="mb-3">Active Hires</h4>
+<div class="row g-3 mb-4">
+    {% for b in active_bookings %}
+    <div class="col-md-6">
+        <div class="card {% if b.is_overdue %}border-danger{% else %}border-primary{% endif %}">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <h6>{{ b.equipment.name }}</h6>
+                    {% if b.is_overdue %}
+                    <span class="badge bg-danger">Overdue {{ b.overdue_days }}d</span>
+                    {% else %}
+                    <span class="badge bg-primary">{{ b.get_status_display }}</span>
+                    {% endif %}
+                </div>
+                <p class="text-muted mb-1">Due: {{ b.end_date }}</p>
+                <a href="{% url 'booking_detail' b.pk %}" class="btn btn-sm btn-outline-primary">View Details</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="text-center mt-4">
+    <a href="{% url 'equipment_list' %}" class="btn btn-primary btn-lg"><i class="bi bi-grid"></i> Browse Equipment</a>
+    <a href="{% url 'my_bookings' %}" class="btn btn-outline-secondary btn-lg ms-2"><i class="bi bi-list"></i> All Bookings</a>
+</div>
+{% endblock %}

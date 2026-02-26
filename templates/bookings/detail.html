@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% load role_tags %}
+{% block title %}Booking {{ booking.booking_number }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2><i class="bi bi-receipt"></i> Booking Details</h2>
+            <span class="badge fs-6
+                {% if booking.status == 'confirmed' %}bg-success
+                {% elif booking.status == 'pending' %}bg-warning text-dark
+                {% elif booking.status == 'issued' %}bg-primary
+                {% elif booking.status == 'returned' %}bg-secondary
+                {% elif booking.status == 'overdue' %}bg-danger
+                {% else %}bg-dark{% endif %}">
+                {{ booking.get_status_display }}
+            </span>
+        </div>
+
+        <div class="card shadow-sm mb-4">
+            <div class="card-header"><h5 class="mb-0">{{ booking.booking_number }}</h5></div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <table class="table table-sm">
+                            <tr><td class="text-muted">Customer</td><td><strong>{{ booking.customer.get_full_name }}</strong></td></tr>
+                            <tr><td class="text-muted">Phone</td><td>{{ booking.customer.phone_number }}</td></tr>
+                            <tr><td class="text-muted">Equipment</td><td><a href="{% url 'equipment_detail' booking.equipment.pk %}">{{ booking.equipment.name }}</a></td></tr>
+                            <tr><td class="text-muted">Serial No.</td><td><code>{{ booking.equipment.serial_number }}</code></td></tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <table class="table table-sm">
+                            <tr><td class="text-muted">Start Date</td><td>{{ booking.start_date }}</td></tr>
+                            <tr><td class="text-muted">End Date</td><td>{{ booking.end_date }}</td></tr>
+                            <tr><td class="text-muted">Hire Days</td><td>{{ booking.hire_days }} days</td></tr>
+                            <tr><td class="text-muted">Booked On</td><td>{{ booking.created_at|date:"M d, Y H:i" }}</td></tr>
+                        </table>
+                    </div>
+                </div>
+
+                {% if booking.notes %}
+                <div class="mt-2"><strong>Notes:</strong> {{ booking.notes }}</div>
+                {% endif %}
+
+                {% if booking.issued_by %}
+                <hr>
+                <div class="row">
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Issued by:</strong> {{ booking.issued_by.get_full_name }}</p>
+                        <p class="mb-1"><strong>Issued at:</strong> {{ booking.issued_at|date:"M d, Y H:i" }}</p>
+                    </div>
+                    {% if booking.returned_at %}
+                    <div class="col-md-6">
+                        <p class="mb-1"><strong>Returned to:</strong> {{ booking.returned_to.get_full_name }}</p>
+                        <p class="mb-1"><strong>Returned at:</strong> {{ booking.returned_at|date:"M d, Y H:i" }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Financial Summary -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header"><h5 class="mb-0"><i class="bi bi-currency-exchange"></i> Financial Summary</h5></div>
+            <div class="card-body">
+                <table class="table mb-0">
+                    <tr>
+                        <td>Hire Cost ({{ booking.hire_days }} days × KES {{ booking.equipment.daily_rate|intcomma }})</td>
+                        <td class="text-end"><strong>KES {{ booking.total_amount|intcomma }}</strong></td>
+                    </tr>
+                    {% if booking.late_fee > 0 %}
+                    <tr class="table-warning">
+                        <td>Late Fee ({{ booking.overdue_days }} days overdue)</td>
+                        <td class="text-end text-danger"><strong>KES {{ booking.late_fee|intcomma }}</strong></td>
+                    </tr>
+                    {% endif %}
+                    {% if booking.damage_fee > 0 %}
+                    <tr class="table-danger">
+                        <td>Damage Charge{% if booking.damage_notes %} – {{ booking.damage_notes }}{% endif %}</td>
+                        <td class="text-end text-danger"><strong>KES {{ booking.damage_fee|intcomma }}</strong></td>
+                    </tr>
+                    {% endif %}
+                    <tr class="table-dark">
+                        <td><strong>Grand Total</strong></td>
+                        <td class="text-end"><strong>KES {{ booking.grand_total|intcomma }}</strong></td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="d-flex gap-2 flex-wrap">
+            {% if booking.status == 'pending' %}
+            <a href="{% url 'booking_payment' booking.pk %}" class="btn btn-success"><i class="bi bi-credit-card"></i> Pay Now</a>
+            <a href="{% url 'cancel_booking' booking.pk %}" class="btn btn-outline-danger"><i class="bi bi-x-lg"></i> Cancel</a>
+            {% endif %}
+
+            {% if user|is_staff_or_admin %}
+                {% if booking.status == 'confirmed' %}
+                <a href="{% url 'issue_equipment' booking.pk %}" class="btn btn-primary"><i class="bi bi-box-arrow-up"></i> Issue Equipment</a>
+                {% endif %}
+                {% if booking.status == 'issued' or booking.status == 'overdue' %}
+                <a href="{% url 'return_equipment' booking.pk %}" class="btn btn-warning"><i class="bi bi-box-arrow-in-down"></i> Process Return</a>
+                {% endif %}
+            {% endif %}
+
+            {% if booking.status == 'confirmed' %}
+            <a href="{% url 'cancel_booking' booking.pk %}" class="btn btn-outline-danger"><i class="bi bi-x-lg"></i> Cancel Booking</a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load humanize %}
+{% block title %}Overdue Items{% endblock %}
+
+{% block content %}
+<h2 class="mb-4"><i class="bi bi-exclamation-triangle text-danger"></i> Overdue Items</h2>
+
+{% if bookings %}
+<div class="alert alert-danger">
+    <strong>{{ bookings.count }} item{{ bookings.count|pluralize }} currently overdue!</strong> Contact customers and process returns promptly.
+</div>
+{% endif %}
+
+<div class="card shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-danger">
+                <tr>
+                    <th>Booking #</th>
+                    <th>Customer</th>
+                    <th>Phone</th>
+                    <th>Equipment</th>
+                    <th>Due Date</th>
+                    <th>Days Overdue</th>
+                    <th>Est. Late Fee</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for b in bookings %}
+                <tr>
+                    <td><strong>{{ b.booking_number }}</strong></td>
+                    <td>{{ b.customer.get_full_name }}</td>
+                    <td><a href="tel:{{ b.customer.phone_number }}">{{ b.customer.phone_number }}</a></td>
+                    <td>{{ b.equipment.name }}</td>
+                    <td>{{ b.end_date }}</td>
+                    <td><span class="badge bg-danger fs-6">{{ b.overdue_days }} days</span></td>
+                    <td class="text-danger fw-bold">KES {{ b.calculate_late_fee|intcomma }}</td>
+                    <td>
+                        <a href="{% url 'return_equipment' b.pk %}" class="btn btn-sm btn-warning">Process Return</a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr><td colspan="8" class="text-center py-4 text-success">
+                    <i class="bi bi-check-circle display-4"></i>
+                    <p class="mt-2">No overdue items. All equipment returned on time!</p>
+                </td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
